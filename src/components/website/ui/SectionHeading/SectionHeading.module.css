@@ -1,0 +1,71 @@
+/* SectionHeading.module.css */
+
+.wrapper {
+    max-width: 680px;
+    margin-bottom: var(--space-12);
+}
+
+/* ── Alignment ───────────────────────────────────────────────────  */
+.center {
+    text-align: center;
+    margin-inline: auto;
+}
+
+.left {
+    text-align: left;
+}
+
+/* ── Eyebrow tag ─────────────────────────────────────────────────  */
+.tag {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    background: var(--color-clay-lavender);
+    padding: var(--space-1) var(--space-4);
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--color-primary-light);
+    box-shadow: 0 3px 0 0 rgba(107, 78, 255, 0.2);
+    margin-bottom: var(--space-4);
+}
+
+/* ── Title ───────────────────────────────────────────────────────  */
+.title {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.15;
+    margin-bottom: var(--space-4);
+}
+
+/* ── Subtitle ────────────────────────────────────────────────────  */
+.subtitle {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    line-height: 1.75;
+    max-width: 540px;
+}
+
+.center .subtitle {
+    margin-inline: auto;
+}
+
+/* ── Light variant ──────────────────────────────────────────────── */
+.light .tag {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.15);
+}
+
+.light .title {
+    color: #fff;
+}
+
+.light .subtitle {
+    color: rgba(255, 255, 255, 0.78);
+}

@@ -1,0 +1,24 @@
+/* globals.css — EduCore SMS
+   Imports: reset, variables, base font + body styles.
+   This is the ONLY non-module global stylesheet. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import "./globalcss/reset.css";
+@import "./globalcss/variables.css";
+
+body {
+    font-family: var(--font-body);
+    font-size: var(--font-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-page);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}

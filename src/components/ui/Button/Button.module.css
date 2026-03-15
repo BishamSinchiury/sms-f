@@ -1,0 +1,111 @@
+/* Button.module.css — Shared app-wide button */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--font-sm);
+    line-height: 1;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition:
+        background-color var(--anim-fast) var(--ease-out),
+        border-color var(--anim-fast) var(--ease-out),
+        box-shadow var(--anim-fast) var(--ease-out),
+        opacity var(--anim-fast) var(--ease-out);
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
+
+/* ── Sizes ──────────────────────────────────────────────────── */
+.sm {
+    height: 32px;
+    padding: 0 var(--space-1-5);
+    font-size: var(--font-xs);
+    border-radius: var(--radius-sm);
+}
+
+.md {
+    height: 40px;
+    padding: 0 var(--space-2);
+    font-size: var(--font-sm);
+}
+
+.lg {
+    height: 48px;
+    padding: 0 var(--space-3);
+    font-size: var(--font-base);
+}
+
+/* ── Variants ───────────────────────────────────────────────── */
+.primary {
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    border-color: var(--color-primary);
+}
+
+.primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.primary:active:not(:disabled) {
+    background-color: var(--color-primary-active);
+    border-color: var(--color-primary-active);
+}
+
+.secondary {
+    background-color: var(--white);
+    color: var(--color-primary);
+    border-color: var(--color-border-strong);
+}
+
+.secondary:hover:not(:disabled) {
+    background-color: var(--color-primary-subtle);
+    border-color: var(--color-primary);
+}
+
+.ghost {
+    background-color: transparent;
+    color: var(--color-primary);
+    border-color: transparent;
+}
+
+.ghost:hover:not(:disabled) {
+    background-color: var(--color-primary-subtle);
+}
+
+.danger {
+    background-color: var(--color-danger);
+    color: var(--white);
+    border-color: var(--color-danger);
+}
+
+.danger:hover:not(:disabled) {
+    background-color: var(--color-danger-hover);
+    border-color: var(--color-danger-hover);
+}
+
+.danger:focus-visible {
+    box-shadow: var(--shadow-focus-danger);
+}
+
+/* ── Modifiers ──────────────────────────────────────────────── */
+.fullWidth {
+    width: 100%;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

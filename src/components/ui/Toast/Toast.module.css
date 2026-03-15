@@ -1,0 +1,134 @@
+/* Toast.module.css */
+
+.container {
+    position: fixed;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    z-index: var(--z-toast);
+    pointer-events: none;
+    max-width: 420px;
+    width: 100%;
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-1);
+    padding: var(--space-1-5) var(--space-2);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background-color: var(--white);
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+    animation: slideIn var(--anim-base) var(--ease-out) forwards;
+    font-size: var(--font-sm);
+    line-height: var(--leading-normal);
+    word-break: break-word;
+}
+
+.toast.exiting {
+    animation: slideOut var(--anim-fast) var(--ease-in-out) forwards;
+}
+
+.icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.message {
+    flex: 1;
+    color: var(--color-text-primary);
+}
+
+.closeBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color var(--anim-fast);
+}
+
+.closeBtn:hover {
+    color: var(--color-text-primary);
+}
+
+/* ── Variants ───────────────────────────────────────────────── */
+.success {
+    background-color: var(--color-success-subtle);
+    border-color: var(--color-success-border);
+}
+
+.success .icon {
+    color: var(--color-success);
+}
+
+.error {
+    background-color: var(--color-danger-subtle);
+    border-color: var(--color-danger-border);
+}
+
+.error .icon {
+    color: var(--color-danger);
+}
+
+.warning {
+    background-color: var(--color-warning-subtle);
+    border-color: var(--color-warning-border);
+}
+
+.warning .icon {
+    color: var(--color-warning);
+}
+
+.info {
+    background-color: var(--color-primary-subtle);
+    border-color: var(--color-border);
+}
+
+.info .icon {
+    color: var(--color-primary);
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .container {
+        right: var(--space-1);
+        left: var(--space-1);
+        max-width: none;
+    }
+}

@@ -1,0 +1,116 @@
+/* AuthLayout.module.css — Two-column auth layout */
+
+.wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-bg-page);
+}
+
+/* ── Left brand panel ───────────────────────────────────────── */
+.brandPanel {
+    display: none;
+    flex: 1;
+    background: linear-gradient(145deg, var(--navy-800), var(--navy-600));
+    color: var(--white);
+    padding: var(--space-6);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.brandPanel::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -20%;
+    width: 60%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(23, 177, 174, 0.15), transparent 70%);
+    border-radius: var(--radius-full);
+}
+
+.brandPanel::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 50%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(217, 162, 0, 0.1), transparent 70%);
+    border-radius: var(--radius-full);
+}
+
+.brandContent {
+    position: relative;
+    z-index: 1;
+    max-width: 380px;
+}
+
+.brandLogo {
+    font-size: var(--font-3xl);
+    font-weight: var(--weight-bold);
+    margin-bottom: var(--space-2);
+    letter-spacing: -0.02em;
+}
+
+.brandTagline {
+    font-size: var(--font-md);
+    opacity: 0.8;
+    line-height: var(--leading-relaxed);
+}
+
+/* ── Right form panel ───────────────────────────────────────── */
+.formPanel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3);
+}
+
+.formCard {
+    width: 100%;
+    max-width: 420px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-5);
+}
+
+/* ── Desktop ────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+    .brandPanel {
+        display: flex;
+    }
+
+    .formPanel {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .formPanel {
+        flex: 0 0 45%;
+        max-width: 45%;
+    }
+}
+
+/* ── Mobile tweaks ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .formCard {
+        padding: var(--space-3);
+        box-shadow: none;
+        background: transparent;
+        border-radius: 0;
+    }
+
+    .formPanel {
+        padding: var(--space-2);
+        align-items: flex-start;
+        padding-top: var(--space-8);
+    }
+}

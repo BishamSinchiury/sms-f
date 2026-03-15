@@ -1,0 +1,99 @@
+/* Input.module.css — Shared input styles for TextInput & PasswordInput */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-0-5);
+}
+
+.label {
+    font-size: var(--font-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    height: 44px;
+    padding: 0 var(--space-1-5);
+    font-size: var(--font-base);
+    color: var(--color-text-primary);
+    background-color: var(--white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition:
+        border-color var(--anim-fast) var(--ease-out),
+        box-shadow var(--anim-fast) var(--ease-out);
+}
+
+.input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-border-focus);
+    box-shadow: var(--shadow-focus);
+}
+
+.input:disabled {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+}
+
+/* ── Password toggle gutter ────────────────────────────────── */
+.hasToggle {
+    padding-right: var(--space-6);
+}
+
+/* ── Error state ───────────────────────────────────────────── */
+.inputError {
+    border-color: var(--color-border-error);
+}
+
+.inputError:focus {
+    box-shadow: var(--shadow-focus-danger);
+    border-color: var(--color-border-error);
+}
+
+.errorMsg {
+    font-size: var(--font-xs);
+    color: var(--color-danger-text);
+    margin-top: var(--space-0-5);
+}
+
+/* ── Password toggle button ────────────────────────────────── */
+.toggleBtn {
+    position: absolute;
+    right: var(--space-1);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color var(--anim-fast) var(--ease-out);
+}
+
+.toggleBtn:hover {
+    color: var(--color-text-secondary);
+}
+
+.toggleBtn:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
