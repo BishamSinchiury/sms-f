@@ -1,8 +1,9 @@
+// FIX 2 (BUG 13): Removed /here route and `here` import — it was a placeholder
+// with a lowercase component name (<here /> renders as an unknown HTML element).
+// Login.jsx no longer redirects to /here (it uses /app/profile/setup instead).
 
 import Home from "@/pages/Website/Home/Home";
-import here from "@/pages/Website/AuthPages/here";
 
 export const publicRoutes = [
   { path: "/", element: <Home /> },
-  { path: "/here", element: <here /> },
 ]

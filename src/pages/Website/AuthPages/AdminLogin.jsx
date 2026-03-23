@@ -30,9 +30,11 @@ export default function AdminLogin() {
   const [otp, setOtp] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Reset auth flow if user navigates away or mounts fresh
+  // FIX 14 (BUG 17): Reset auth flow only if user navigated back mid-flow.
+  // On fresh mount, authStep is 'idle' → no-op. When returning during 'otp_pending'
+  // step, authStep !== 'idle' → reset to clean state.
   useEffect(() => {
-    if (authStep === 'idle') {
+    if (authStep !== 'idle') {
       resetFlow();
     }
   }, []);

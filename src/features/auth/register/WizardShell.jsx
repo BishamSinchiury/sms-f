@@ -84,7 +84,7 @@ const INITIAL_FORM = {
   vendor:  { company_name: "", service_type: "", tax_id: "" },
 };
 
-export default function WizardShell({ selectedRole, orgSlug, roleName, onBack }) {
+export default function WizardShell({ selectedRole, orgSlug, roleName, verifiedEmail, onBack }) {
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -93,6 +93,9 @@ export default function WizardShell({ selectedRole, orgSlug, roleName, onBack })
     role_id:   selectedRole.id,
     role_type: selectedRole.role_type ? selectedRole.role_type.toLowerCase() : "",
     org_slug:  orgSlug,
+    // Pre-fill the verified email so it is included in the wizard payload
+    // even though the field will be rendered read-only in StepAccountInfo.
+    email: verifiedEmail || "",
   });
   const [currentStep, setCurrentStep] = useState(0);
   const [errors, setErrors]           = useState({});
@@ -221,7 +224,7 @@ export default function WizardShell({ selectedRole, orgSlug, roleName, onBack })
          });
       }
       
-      navigate("/app/dashboard");
+      navigate("/app/profile/setup"); // navigate directly to setup — skips the PrivateRoute redirect hop
       
     } catch (err) {
       const data = err.response?.data;
@@ -291,6 +294,8 @@ export default function WizardShell({ selectedRole, orgSlug, roleName, onBack })
                   : updateField
               }
               errors={stepErrors}
+              // Pass verifiedEmail only to StepAccountInfo so it can lock the email field.
+              {...(step.key === "accountInfo" ? { verifiedEmail } : {})}
             />
           )}
         </div>

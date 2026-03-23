@@ -15,11 +15,27 @@ import { publicRoutes } from "../routes/PublicRoutes";
  * If the user is already logged in, redirect them to the user dashboard.
  */
 export function UserGuestRoute({ children }) {
-  const { user, loading, initialized } = useAuth();
+  const { user, initialized } = useAuth();
 
-  if (!initialized) return null;
+  // FIX 7 (BUG 8): Show spinner instead of blank screen during session restore.
+  if (!initialized) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column' }}>
+      <div style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+      <p style={{ marginTop: '16px', color: 'var(--text-secondary)' }}>Restoring session...</p>
+    </div>
+  );
 
   if (user) {
+    // BUG 5 FIX: Route directly to the correct destination instead of always
+    // going to /app/dashboard and forcing PrivateRoute to do a second redirect.
+    const status = user.membership_status;
+    if (status === 'suspended') {
+      return <Navigate to="/setup/status" replace />;
+    }
+    if (status === 'pending' || status === 'waiting_approval' || status === 'rejected') {
+      return <Navigate to="/app/profile/setup" replace />;
+    }
+    // Active user (or unknown status) → dashboard
     return <Navigate to="/app/dashboard" replace />;
   }
 

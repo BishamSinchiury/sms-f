@@ -117,7 +117,9 @@ function UserDetailPanel({ user, onClose }) {
 export default function UserApprovals() {
     const [users, setUsers]               = useState([]);
     const [loading, setLoading]           = useState(true);
-    const [actionLoading, setActionLoading] = useState(null);
+    // FIX 11 (BUG 15): Per-row loading state using a Set, not a single value.
+    // This allows multiple independent approve/reject actions concurrently.
+    const [actionLoading, setActionLoading] = useState(new Set());
     const [selectedUser, setSelectedUser] = useState(null);
     const { addToast } = useToast();
 
@@ -135,7 +137,7 @@ export default function UserApprovals() {
     }
 
     async function handleApprove(id) {
-        setActionLoading(id);
+        setActionLoading(prev => new Set(prev).add(id));
         try {
             await adminApi.post(`/sys/users/${id}/approve/`);
             addToast({ type: 'success', message: 'User approved.' });
@@ -144,14 +146,14 @@ export default function UserApprovals() {
         } catch {
             addToast({ type: 'error', message: 'Failed to approve user.' });
         } finally {
-            setActionLoading(null);
+            setActionLoading(prev => { const next = new Set(prev); next.delete(id); return next; });
         }
     }
 
     async function handleReject(id) {
         const reason = prompt('Optional rejection reason:');
         if (reason === null) return;
-        setActionLoading(id);
+        setActionLoading(prev => new Set(prev).add(id));
         try {
             await adminApi.post(`/sys/users/${id}/reject/`, { reason });
             addToast({ type: 'success', message: 'User rejected.' });
@@ -160,7 +162,7 @@ export default function UserApprovals() {
         } catch {
             addToast({ type: 'error', message: 'Failed to reject user.' });
         } finally {
-            setActionLoading(null);
+            setActionLoading(prev => { const next = new Set(prev); next.delete(id); return next; });
         }
     }
 
@@ -239,8 +241,8 @@ export default function UserApprovals() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleReject(u.id)}
-                                                loading={actionLoading === u.id}
-                                                disabled={actionLoading !== null}
+                                                loading={actionLoading.has(u.id)}
+                                                disabled={actionLoading.has(u.id)}
                                                 style={{ color: 'var(--error)' }}
                                             >
                                                 Reject
@@ -249,8 +251,8 @@ export default function UserApprovals() {
                                                 variant="primary"
                                                 size="sm"
                                                 onClick={() => handleApprove(u.id)}
-                                                loading={actionLoading === u.id}
-                                                disabled={actionLoading !== null || u.status === 'pending'}
+                                                loading={actionLoading.has(u.id)}
+                                                disabled={actionLoading.has(u.id)}
                                                 title={u.status === 'pending' ? 'User has not completed profile' : ''}
                                             >
                                                 Approve

@@ -19,7 +19,10 @@ export function PrivateRoute({ children }) {
 
   const { profile_complete, membership_status } = user ?? {};
 
-  // Zone B checks
+  // Zone B checks — redirect non-active users to profile setup or status page.
+  // FIX 6 (BUG 12): waiting_approval intentionally goes to /app/profile/setup, NOT /setup/status.
+  // ProfileSetup.jsx handles waiting_approval by showing a read-only status card (via showForm=false).
+  // Only 'suspended' goes to /setup/status (StatusPage), which is a separate terminal page.
   if (!profile_complete) return <Navigate to="/app/profile/setup" replace />;
   if (membership_status === 'pending') return <Navigate to="/app/profile/setup" replace />;
   if (membership_status === 'waiting_approval') return <Navigate to="/app/profile/setup" replace />;

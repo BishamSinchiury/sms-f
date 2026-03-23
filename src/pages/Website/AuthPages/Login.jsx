@@ -62,12 +62,16 @@ export default function Login() {
     );
   }
 
+  // FIX 2 (BUG 3): Redirect authenticated users based on status.
+  // pending/waiting_approval/rejected → /app/profile/setup (ProfileSetup handles both form + status card)
+  // suspended → /setup/status (StatusPage)
+  // profile_complete=false → /app/profile/setup (was previously /here — a broken placeholder)
   if (isAuthenticated) {
     const s = user?.membership_status;
-    if (!user?.profile_complete) return <Navigate to="/here" replace />;
+    if (!user?.profile_complete) return <Navigate to="/app/profile/setup" replace />;
     if (s === 'pending') return <Navigate to="/app/profile/setup" replace />;
-    if (s === 'waiting_approval') return <Navigate to="/setup/status" replace />;
-    if (s === 'rejected') return <Navigate to="/setup/status" replace />;
+    if (s === 'waiting_approval') return <Navigate to="/app/profile/setup" replace />;
+    if (s === 'rejected') return <Navigate to="/app/profile/setup" replace />;
     if (s === 'suspended') return <Navigate to="/setup/status" replace />;
     return <Navigate to="/app/dashboard" replace />;
   }

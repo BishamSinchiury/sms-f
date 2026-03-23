@@ -71,14 +71,33 @@ export default function ProfileSetup() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false); // FIX 5 (BUG 6): track profile fetch failure
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(0);
 
-  const membershipStatus = user?.membership_status || 'pending';
+  // BUG 1 FIX + GAP 1 FIX:
+  // showForm must NOT initialize from user?.membership_status because user is null
+  // on mount when AuthContext is still resolving (browser reload case).
+  // formInitialized prevents rendering either the form OR the card until the
+  // useEffect has fired at least once with a real user object — eliminating both:
+  //   a) the form flicker for waiting_approval users (showForm was stuck at true)
+  //   b) the card flicker for rejected users (showForm was false before useEffect)
+  const [showForm, setShowForm] = useState(false);
+  const [formInitialized, setFormInitialized] = useState(false);
+
+  const membershipStatus = user?.membership_status;
   const roleType = user?.role_type;
   const isRejected = membershipStatus === 'rejected';
-  const [showForm, setShowForm] = useState(membershipStatus === 'pending');
+
+  // Reactively set showForm once user is available and loading is done.
+  // 'pending' and 'rejected' both show the editable form.
+  // 'waiting_approval' and 'suspended' both show the status card.
+  useEffect(() => {
+    if (!user) return;
+    setShowForm(['pending', 'rejected'].includes(user.membership_status));
+    setFormInitialized(true); // unlock rendering — prevents all flash states
+  }, [user?.membership_status]);
 
   // Define steps dynamically based on role
 
@@ -102,6 +121,7 @@ export default function ProfileSetup() {
   useEffect(() => {
     async function fetchProfile() {
       try {
+        setFetchError(false); // FIX 5: reset on retry
         const res = await authApi.get('/profile/me/');
         const profile = res.data;
         
@@ -135,6 +155,8 @@ export default function ProfileSetup() {
         });
       } catch (err) {
         console.error('Failed to fetch profile', err);
+        // FIX 5 (BUG 6): Set error state so user sees retry button, not blank form.
+        setFetchError(true);
       } finally {
         setLoading(false);
       }
@@ -142,7 +164,35 @@ export default function ProfileSetup() {
     fetchProfile();
   }, []);
 
-  if (!user || loading) return <div className={styles.wizardContainer}><p>Loading profile...</p></div>;
+  // GAP 1 + BUG 1: show loading spinner while any of these are unresolved:
+  // - AuthContext still loading (user might change)
+  // - formInitialized is false (useEffect hasn't fired yet — prevents all flash states)
+  // - profile fetch still in progress
+  if (!user || loading || !formInitialized) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <p style={{ color: 'var(--text-secondary)' }}>Loading profile...</p>
+      </div>
+    );
+  }
+
+  // FIX 5 (BUG 6): If profile fetch failed, show error + retry button.
+  // Prevents the form from rendering with empty first_name / last_name / phone
+  // which the user might unknowingly submit.
+  if (fetchError) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: '16px' }}>
+        <p style={{ color: 'var(--error, #dc2626)', fontWeight: 500 }}>Failed to load your profile data.</p>
+        <button
+          onClick={() => { setLoading(true); setFetchError(false); window.location.reload(); }}
+          style={{ padding: '8px 20px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   const totalSteps = steps.length;
   const step = steps[currentStep];
@@ -215,12 +265,9 @@ export default function ProfileSetup() {
   async function handleSubmit() {
     setSubmitting(true);
     try {
-      let isMultipart = false;
+      // STEP 1: Update Person fields via /profile/me/.
+      // GAP 3 / BUG 4: if step 1 fails we STOP here — step 2 must not run.
       if (formData.photo instanceof File) {
-        isMultipart = true;
-      }
-
-      if (isMultipart) {
         const payload = new FormData();
         payload.append('first_name', formData.first_name);
         payload.append('last_name', formData.last_name);
@@ -236,16 +283,16 @@ export default function ProfileSetup() {
         payload.append('state_or_province', formData.state_or_province);
         payload.append('postal_code', formData.postal_code);
         payload.append('country', formData.country);
-        
-        if (formData.photo instanceof File) {
-          payload.append('photo', formData.photo);
+        payload.append('photo', formData.photo);
+
+        // FIX 4 (BUG 9): Append role-specific data as JSON to the multipart payload.
+        // Without this, teacher specialization, student guardian info, etc. are silently
+        // lost when a photo is being uploaded. PersonSerializer.update() already handles
+        // JSON-encoded role data via the role key in extra_data.
+        if (roleType && formData[roleType]) {
+          payload.append(roleType, JSON.stringify(formData[roleType]));
         }
 
-        if (roleType && formData[roleType]) {
-           // We can't nicely append a nested dict in standard multipart without flattening.
-           // Note: DRF may need Flattened JSON or we skip it here.
-           // For simplicity, we just won't update role dicts with multipart right now, or we'll send it if we must.
-        }
         await authApi.patch('/profile/me/', payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
@@ -266,31 +313,48 @@ export default function ProfileSetup() {
           postal_code: formData.postal_code,
           country: formData.country,
         };
-
         if (roleType && formData[roleType]) {
           payload[roleType] = formData[roleType];
         }
-
         await authApi.patch('/profile/me/', payload);
       }
-
-      // Trigger the status change to WAITING_APPROVAL
-      await authApi.patch('/users/me/profile/', {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone_number: formData.phone_number
-      });
-      
-      addToast({ type: 'success', message: 'Profile submitted successfully!' });
-      
-      await tryRestoreSession();
-      navigate('/app/dashboard');
     } catch (err) {
-      console.error(err);
-      addToast({ type: 'error', message: 'Failed to update profile. Please check the network.' });
-    } finally {
+      // Step 1 failed — stop completely, do not touch membership status.
+      console.error('Step 1 (profile/me) failed:', err);
+      addToast({ type: 'error', message: 'Failed to save your profile. Please check your connection and try again.' });
       setSubmitting(false);
+      return; // GAP 3: explicit early return — step 2 never runs if step 1 fails
     }
+
+    try {
+      // STEP 2: Trigger status transition to WAITING_APPROVAL via /users/me/profile/.
+      // Only runs if step 1 succeeded. UserProfileUpdateView sets status = WAITING_APPROVAL.
+      await authApi.patch('/users/me/profile/', {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone_number: formData.phone_number,
+      });
+    } catch (err) {
+      // Step 2 failed — Person data is already saved but status was not updated.
+      // GAP 3: specific message distinguishes this from a step-1 failure.
+      console.error('Step 2 (users/me/profile) failed:', err);
+      addToast({
+        type: 'error',
+        message: 'Your profile was saved but submission failed. Please try submitting again.',
+      });
+      setSubmitting(false);
+      return; // do not call tryRestoreSession or navigate
+    }
+
+    // GAP 3: BOTH steps succeeded. Refresh AuthContext BEFORE navigating so that
+    // when ProfileSetup remounts, user.membership_status is already 'waiting_approval'
+    // and the useEffect fires correctly — no flash of the wrong view.
+    await tryRestoreSession();
+    addToast({ type: 'success', message: 'Profile submitted! Awaiting admin approval.' });
+    // Navigate directly to /app/profile/setup — not /app/dashboard — to skip the
+    // PrivateRoute redirect hop and land immediately on the status card.
+    navigate('/app/profile/setup');
+    setSubmitting(false);
   }
 
   const renderBasicInfo = () => (
