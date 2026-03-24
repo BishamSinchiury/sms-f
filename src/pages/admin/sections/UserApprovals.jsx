@@ -66,12 +66,16 @@ function UserDetailPanel({ user, onClose }) {
                     {/* Avatar */}
                     <div style={{
                         width: '72px', height: '72px', borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                        background: user.photo_url 
+                            ? `url(${user.photo_url}) center/cover no-repeat` 
+                            : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: '#fff', fontSize: '1.75rem', fontWeight: 700,
                         marginBottom: '1.25rem',
+                        border: '2px solid var(--color-border, #e2e8f0)',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                     }}>
-                        {(user.first_name?.[0] || user.email?.[0] || '?').toUpperCase()}
+                        {!user.photo_url && ((user.first_name?.[0] || user.email?.[0] || '?').toUpperCase())}
                     </div>
 
                     {/* Status badge */}
@@ -90,19 +94,21 @@ function UserDetailPanel({ user, onClose }) {
 
                     {/* Fields */}
                     {[
-                        { label: 'Full Name',    value: `${user.first_name || ''} ${user.last_name || ''}`.trim() || '—' },
-                        { label: 'Email',        value: user.email        || '—' },
-                        { label: 'Phone Number', value: user.phone_number || '—' },
-                        { label: 'Requested Role', value: user.role_name  || '—' },
-                        { label: 'Registered At', value: user.created_at
+                        { label: 'Full Name',         value: `${user.first_name || ''} ${user.last_name || ''}`.trim() || '—' },
+                        { label: 'Email',             value: user.email        || '—' },
+                        { label: 'Phone Number',      value: user.phone_number || '—' },
+                        { label: 'Gender',            value: user.gender       || '—', style: { textTransform: 'capitalize' } },
+                        { label: 'Registration Type', value: user.role_type    || '—', style: { textTransform: 'capitalize' } },
+                        { label: 'Requested Role',    value: user.role_name    || '—' },
+                        { label: 'Registered At',     value: user.created_at
                             ? new Date(user.created_at).toLocaleString()
                             : '—' },
-                    ].map(({ label, value }) => (
+                    ].map(({ label, value, style }) => (
                         <div key={label} style={{ marginBottom: '1.25rem' }}>
                             <p style={{ margin: '0 0 2px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 {label}
                             </p>
-                            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--navy-700, #1a202c)', fontWeight: 500 }}>
+                            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--navy-700, #1a202c)', fontWeight: 500, ...(style || {}) }}>
                                 {value}
                             </p>
                         </div>

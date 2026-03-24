@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Eye, EyeOff, Info } from "lucide-react";
 import "./StepFields.css";
 
 const FIELDS = [
@@ -9,8 +11,29 @@ const FIELDS = [
 
 // Accept verifiedEmail prop — set by WizardShell when the email was pre-verified via OTP.
 export default function StepAccountInfo({ data, onChange, errors = {}, verifiedEmail }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   return (
     <div>
+      <div style={{
+        background: "#eff6ff",
+        color: "#1e3a8a",
+        padding: "12px 16px",
+        borderRadius: "8px",
+        fontSize: "0.85rem",
+        marginBottom: "20px",
+        border: "1px solid #bfdbfe",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px"
+      }}>
+        <Info size={18} style={{ flexShrink: 0 }} />
+        <span>
+          <strong>Note:</strong> Once you complete this step, your account will be created. You can continue the rest of the setup now, or log in later to finish it.
+        </span>
+      </div>
+
       <div className="sf-grid-2">
         {["first_name", "last_name"].map((key) => {
           const f = FIELDS.find((f) => f.key === key);
@@ -70,29 +93,73 @@ export default function StepAccountInfo({ data, onChange, errors = {}, verifiedE
 
       <div className="sf-group">
         <label htmlFor="acc-password" className="sf-label">Password</label>
-        <input
-          id="acc-password"
-          type="password"
-          value={data.password}
-          onChange={(e) => onChange("password", e.target.value)}
-          placeholder="At least 8 characters"
-          autoComplete="new-password"
-          className={`sf-input${errors.password ? " has-error" : ""}`}
-        />
+        <div style={{ position: "relative" }}>
+          <input
+            id="acc-password"
+            type={showPassword ? "text" : "password"}
+            value={data.password}
+            onChange={(e) => onChange("password", e.target.value)}
+            placeholder="At least 8 characters"
+            autoComplete="new-password"
+            className={`sf-input${errors.password ? " has-error" : ""}`}
+            style={{ paddingRight: "40px" }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+            style={{
+              position: "absolute",
+              right: "10px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "#9ca3af",
+              display: "flex",
+              alignItems: "center"
+            }}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         {errors.password && <p className="sf-error">{errors.password}</p>}
       </div>
 
       <div className="sf-group">
         <label htmlFor="acc-confirm" className="sf-label">Confirm Password</label>
-        <input
-          id="acc-confirm"
-          type="password"
-          value={data.confirm_password}
-          onChange={(e) => onChange("confirm_password", e.target.value)}
-          placeholder="Repeat the password"
-          autoComplete="new-password"
-          className={`sf-input${errors.confirm_password ? " has-error" : ""}`}
-        />
+        <div style={{ position: "relative" }}>
+          <input
+            id="acc-confirm"
+            type={showConfirmPassword ? "text" : "password"}
+            value={data.confirm_password}
+            onChange={(e) => onChange("confirm_password", e.target.value)}
+            placeholder="Repeat the password"
+            autoComplete="new-password"
+            className={`sf-input${errors.confirm_password ? " has-error" : ""}`}
+            style={{ paddingRight: "40px" }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            tabIndex={-1}
+            style={{
+              position: "absolute",
+              right: "10px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "#9ca3af",
+              display: "flex",
+              alignItems: "center"
+            }}
+          >
+            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         {errors.confirm_password && <p className="sf-error">{errors.confirm_password}</p>}
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Building2, Plus, Edit3, PowerOff, RefreshCw,
     AlertTriangle, Users, Layers, CheckCircle,
-    RotateCcw,
+    RotateCcw, Grid, List, MoreVertical
 } from 'lucide-react';
 import adminApi from '@/services/axios/adminApi';
 import { Button } from '@/components/ui/Button';
@@ -165,6 +165,87 @@ function SubOrgRow({ subOrg, onToggle }) {
     );
 }
 
+function SubOrgCard({ subOrg, onToggle }) {
+    const navigate = useNavigate();
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [toggling, setToggling] = useState(false);
+
+    const handleToggle = async () => {
+        setMenuOpen(false);
+        setToggling(true);
+        await onToggle(subOrg);
+        setToggling(false);
+    };
+
+    return (
+        <div style={{
+            background: '#fff', borderRadius: '12px', border: '1px solid var(--color-border)',
+            padding: '1.5rem', position: 'relative', display: 'flex', flexDirection: 'column', gap: '1rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}>
+            {/* Action Menu (Top Right) */}
+            <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+                <button 
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', color: '#64748b' }}
+                >
+                    <MoreVertical size={18} />
+                </button>
+                {menuOpen && (
+                    <div style={{
+                        position: 'absolute', top: '100%', right: 0, background: '#fff', 
+                        border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px', 
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '130px'
+                    }}>
+                        <button 
+                            onClick={() => navigate(`/app/admin/sub-orgs/${subOrg.code}`)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '8px 12px', border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', fontSize: '0.85rem', color: '#334155' }}
+                            onMouseEnter={e => e.target.style.background = '#f1f5f9'}
+                            onMouseLeave={e => e.target.style.background = 'transparent'}
+                        >
+                            <Edit3 size={14} /> Edit
+                        </button>
+                        <button 
+                            onClick={handleToggle}
+                            disabled={toggling}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '8px 12px', border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', fontSize: '0.85rem', color: subOrg.is_active ? '#dc2626' : '#16a34a' }}
+                            onMouseEnter={e => e.target.style.background = '#f1f5f9'}
+                            onMouseLeave={e => e.target.style.background = 'transparent'}
+                        >
+                            {toggling ? <RefreshCw size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> : subOrg.is_active ? <><PowerOff size={14} /> Deactivate</> : <><RotateCcw size={14} /> Restore</>}
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Avatar & Info */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div className={`${styles.nameAvatar} ${TYPE_AVATAR_CLASS[subOrg.sub_type] ?? styles.nameAvatarOther}`} style={{ width: '48px', height: '48px', fontSize: '1.25rem' }}>
+                    {getInitials(subOrg.name)}
+                </div>
+                <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#0f172a' }}>{subOrg.name}</h3>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', fontFamily: 'monospace' }}>{subOrg.code}</div>
+                </div>
+            </div>
+
+            {/* Badges */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '0.5rem' }}>
+                <span className={`${styles.typeBadge} ${TYPE_BADGE_CLASS[subOrg.sub_type] ?? styles.typeOther}`}>
+                    {TYPE_LABELS[subOrg.sub_type] ?? subOrg.sub_type}
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '12px', background: '#f1f5f9', color: '#475569', fontSize: '0.75rem', fontWeight: 500 }}>
+                    <Users size={12} /> {subOrg.member_count ?? 0} Members
+                </span>
+                <span className={`${styles.statusBadge} ${subOrg.is_active ? styles.statusActive : styles.statusInactive}`}>
+                    <span className={styles.statusDot} />
+                    {subOrg.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </div>
+        </div>
+    );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
@@ -176,6 +257,7 @@ const SubOrgList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showInactive, setShowInactive] = useState(false);
+    const [viewMode, setViewMode] = useState('table'); // 'table' | 'card'
 
     const fetchSubOrgs = useCallback(async () => {
         setLoading(true);
@@ -235,6 +317,34 @@ const SubOrgList = () => {
                     >
                         {showInactive ? 'Hide Inactive' : 'Show Inactive'}
                     </Button>
+                    <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px' }}>
+                        <button
+                            onClick={() => setViewMode('table')}
+                            style={{ 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                padding: '4px 8px', borderRadius: '4px', border: 'none', 
+                                background: viewMode === 'table' ? '#fff' : 'transparent',
+                                boxShadow: viewMode === 'table' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                                color: viewMode === 'table' ? '#0f172a' : '#64748b', cursor: 'pointer'
+                            }}
+                            title="Table View"
+                        >
+                            <List size={16} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('card')}
+                            style={{ 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                padding: '4px 8px', borderRadius: '4px', border: 'none', 
+                                background: viewMode === 'card' ? '#fff' : 'transparent',
+                                boxShadow: viewMode === 'card' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                                color: viewMode === 'card' ? '#0f172a' : '#64748b', cursor: 'pointer'
+                            }}
+                            title="Card View"
+                        >
+                            <Grid size={16} />
+                        </button>
+                    </div>
                     <Button
                         variant="primary"
                         size="sm"
@@ -295,6 +405,16 @@ const SubOrgList = () => {
                                 >
                                     <Plus size={14} /> Add your first sub-org
                                 </Button>
+                            </div>
+                        ) : viewMode === 'card' ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', padding: '1.5rem' }}>
+                                {subOrgs.map(s => (
+                                    <SubOrgCard
+                                        key={s.id}
+                                        subOrg={s}
+                                        onToggle={handleToggle}
+                                    />
+                                ))}
                             </div>
                         ) : (
                             <div className={styles.tableBody}>

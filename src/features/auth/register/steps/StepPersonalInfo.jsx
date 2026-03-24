@@ -176,6 +176,43 @@ export default function StepPersonalInfo({ data, onChange, errors }) {
           className="sf-input"
         />
       </div>
+
+      <h3 className="sf-section-title" style={{ marginTop: '24px', fontSize: '1rem', color: '#111827', fontWeight: 600 }}>Emergency Contact <span className="sf-optional">(optional)</span></h3>
+      <div className="sf-grid-2">
+        <div className="sf-group">
+          <label htmlFor="ec-name" className="sf-label">Contact Name</label>
+          <input
+            id="ec-name"
+            type="text"
+            value={data.emergency_contact_name || ''}
+            onChange={(e) => onChange("emergency_contact_name", e.target.value)}
+            className="sf-input"
+            placeholder="e.g. Jane Doe"
+          />
+        </div>
+        <div className="sf-group">
+          <label htmlFor="ec-phone" className="sf-label">Contact Phone</label>
+          <input
+            id="ec-phone"
+            type="text"
+            value={data.emergency_contact_phone || ''}
+            onChange={(e) => onChange("emergency_contact_phone", e.target.value)}
+            className="sf-input"
+            placeholder="+977 98XXXXXXXX"
+          />
+        </div>
+      </div>
+      <div className="sf-group" style={{ marginTop: '16px' }}>
+        <label htmlFor="ec-relation" className="sf-label">Relation</label>
+        <input
+          id="ec-relation"
+          type="text"
+          value={data.emergency_contact_relation || ''}
+          onChange={(e) => onChange("emergency_contact_relation", e.target.value)}
+          className="sf-input"
+          placeholder="e.g. Spouse, Parent, Sibling"
+        />
+      </div>
     </div>
   );
 }

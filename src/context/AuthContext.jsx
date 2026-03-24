@@ -12,18 +12,19 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser]   = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const restoreSession = useCallback(async () => {
     try {
       // Use publicApi to maintain correct complete URL / token headers
       const res = await publicApi.post('/auth/refresh/', {}, { withCredentials: true });
+      console.log("data", res.data)
       const { access_token, profile_complete, membership_status, role_type } = res.data;
-      
+
       localStorage.setItem('access_token', access_token);
       publicApi.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      
+
       setUser({ profile_complete, membership_status, role_type });
       setIsAuthenticated(true);
     } catch {
@@ -46,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signOut = useCallback(async () => {
-    try { await publicApi.post('/auth/logout/', {}, { withCredentials: true }); } catch {}
+    try { await publicApi.post('/auth/logout/', {}, { withCredentials: true }); } catch { }
     localStorage.removeItem('access_token');
     delete publicApi.defaults.headers.common['Authorization'];
     setIsAuthenticated(false);
@@ -54,13 +55,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ 
-      isAuthenticated, 
-      user, 
-      loading, 
+    <AuthContext.Provider value={{
+      isAuthenticated,
+      user,
+      loading,
       initialized: !loading, /* alias for backward compat */
-      signIn, 
-      signOut, 
+      signIn,
+      signOut,
       setUser,
       tryRestoreSession: restoreSession, /* alias for backward compat */
       logout: signOut /* alias for backward compat */

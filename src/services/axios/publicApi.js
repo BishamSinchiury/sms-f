@@ -4,12 +4,12 @@ import { getCsrfToken } from "./crsfHelper";
 
 const publicApi = axios.create(defaultConfig);
 
-publicApi.interceptors.request.use((config)=> {
-    const unsafeMethods = ["post", "put", "patch", "delete"];
-    if (unsafeMethods.includes(config.method)) {
-        config.headers["X-CSRFToken"] = getCsrfToken();
-    }
-    return config;
+publicApi.interceptors.request.use((config) => {
+  const unsafeMethods = ["post", "put", "patch", "delete"];
+  if (unsafeMethods.includes(config.method)) {
+    config.headers["X-CSRFToken"] = getCsrfToken();
+  }
+  return config;
 });
 let isRefreshing = false;
 
@@ -38,12 +38,15 @@ publicApi.interceptors.response.use(
         publicApi.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
         originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
         isRefreshing = false;
+        
         return publicApi(originalRequest);   // retry with new token
       } catch {
         isRefreshing = false;
         localStorage.removeItem('access_token');
         delete publicApi.defaults.headers.common['Authorization'];
-        window.location.href = '/login';
+        if (window.location.pathname !== '/login') {   // ← guard here
+          window.location.href = '/login';
+        }
         return Promise.reject(error);
       }
     }
